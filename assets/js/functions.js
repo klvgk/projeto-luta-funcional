@@ -6,14 +6,14 @@
 const defaultCharacter = {
     name: '',
     life: 1,
-    maxLife:1,
+    maxLife: 1,
     attack: 0,
     defense: 0
 };
 
 //Criação do Knight;
 const createKnight = (name) => {
-    return{
+    return {
         ...defaultCharacter,
         name,
         life: 100,
@@ -69,7 +69,7 @@ const stage = {
     fighter2El: null,
 
     //Inicializa o jogo;
-    start(fighter1, fighter2, fighter1El, fighter2El){
+    start(fighter1, fighter2, fighter1El, fighter2El) {
         this.fighter1 = fighter1;
         this.fighter2 = fighter2;
         this.fighter1El = fighter1El;
@@ -93,40 +93,54 @@ const stage = {
     //Atualiza os elementos da tela;
     update() {
         //Fighter1;
-        this.fighter1El.querySelector('.name').innerHTML = `${this.fighter1.name} - ${this.fighter1.life.toFixed(1)}HP`;
+        this.fighter1El.querySelector('.name').innerHTML = `${this.fighter1.name} - ${this.fighter1.life.toFixed(1)} HP`;
         let f1Pct = (this.fighter1.life / this.fighter1.maxLife) * 100;
         this.fighter1El.querySelector('.bar').style.width = `${f1Pct}%`;
         //Fighter2;
-        this.fighter2El.querySelector('.name').innerHTML = `${this.fighter2.name} - ${this.fighter2.life.toFixed(1)}HP`;
+        this.fighter2El.querySelector('.name').innerHTML = `${this.fighter2.name} - ${this.fighter2.life.toFixed(1)} HP`;
         let f2Pct = (this.fighter2.life / this.fighter2.maxLife) * 100;
         this.fighter2El.querySelector('.bar').style.width = `${f2Pct}%`;
     },
 
     //Lógica por trás do calculo de Ataque e Defesa;
     doAttack(attacking, attacked) {
-        if(attacking.life <= 0 || attacked.life <= 0) {
-            log.addMessage('Respeite os mortos');
+
+        //Verifica se o ataque foi feito em/por um personagem que já morreu;
+        if (attacking.life <= 0 && attacked.life > 0) {
+            log.addMessage('Mortos não lutam!');
             return;
+        } else if (attacking.life > 0 && attacked.life <= 0) {
+            log.addMessage('Respeite os mortos!');
         }
 
+        //Algoritmo que calcula o Fator de Ataque/Defesa dos personagens;
         const attackFactor = (Math.random() * 2).toFixed(2);
         const defenseFactor = (Math.random() * 2).toFixed(2);
 
-        const actualAttack = attacking.attack * attackFactor;
-        const actualDefense = attacked.defense * defenseFactor;
+        /*
+        Ataque e Defesa atuais, que são o Ataque/Defesa dos personagens,
+        multiplicados pelo Fator de Ataque/Defesa dos personagens;
+        */
+        let actualAttack = (attacking.attack * attackFactor).toFixed(1);
+        let actualDefense = (attacked.defense * defenseFactor).toFixed(1);
 
-        if(actualAttack > actualDefense) {
-            attacked.life -= actualAttack;
-            attacked.life = attacked.life < 0 ? 0 : attacked.life;
-            log.addMessage(`${attacking.name} causou ${actualAttack} de Dano em ${attacked.name}..`);
-        }else{
-            log.addMessage(`${attacked.name} defendeu o ataque de ${attacking.name}..`);
+        //Verificação se o Atacante/Atacado estão vivos e diminui o HP do personagem;
+        if (attacking.life > 0 && attacked.life > 0) {
+            //Verificação se o Ataque foi Defendido ou teve Exito;
+            if (actualAttack > actualDefense) {
+                attacked.life -= actualAttack;
+                log.addMessage(`${attacking.name} causou ${actualAttack} de Dano em ${attacked.name}..`);
+            } else {
+                log.addMessage(`${attacked.name} defendeu o ataque de ${attacking.name}..`);
+            }
         }
 
+        //Atualiza os elementos da tela com os novos status.
         this.update();
     }
 }
 
+//Joga a narração da luta na tela;
 const log = {
     list: [],
     addMessage(msg) {
@@ -137,7 +151,7 @@ const log = {
         const logEl = document.querySelector('.log');
         logEl.innerHTML = '';
 
-        for(let i in this.list){
+        for (let i in this.list) {
             logEl.innerHTML += `<li>${this.list[i]}</li>`;
         }
     },
