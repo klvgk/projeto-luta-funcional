@@ -105,7 +105,7 @@ const stage = {
     //Lógica por trás do calculo de Ataque e Defesa;
     doAttack(attacking, attacked) {
         if(attacking.life <= 0 || attacked.life <= 0) {
-            console.log('Respeite os mortos');
+            log.addMessage('Respeite os mortos');
             return;
         }
 
@@ -118,12 +118,27 @@ const stage = {
         if(actualAttack > actualDefense) {
             attacked.life -= actualAttack;
             attacked.life = attacked.life < 0 ? 0 : attacked.life;
-            console.log(`${attacking.name} causou ${actualAttack} de Dano em ${attacked.name}..`);
+            log.addMessage(`${attacking.name} causou ${actualAttack} de Dano em ${attacked.name}..`);
         }else{
-            console.log(`${attacked.name} defendeu o ataque de ${attacking.name}..`);
+            log.addMessage(`${attacked.name} defendeu o ataque de ${attacking.name}..`);
         }
-
 
         this.update();
     }
+}
+
+const log = {
+    list: [],
+    addMessage(msg) {
+        this.list.push(msg);
+        this.render();
+    },
+    render() {
+        const logEl = document.querySelector('.log');
+        logEl.innerHTML = '';
+
+        for(let i in this.list){
+            logEl.innerHTML += `<li>${this.list[i]}</li>`;
+        }
+    },
 }
